@@ -2,7 +2,7 @@
 
 import asyncio
 
-from pyppeteer import launch
+from pyppeteer2 import launch
 from scrapy import signals
 from scrapy.http import HtmlResponse
 from twisted.internet.defer import Deferred
@@ -24,7 +24,7 @@ class PuppeteerMiddleware:
         """Start the browser"""
 
         middleware = cls()
-        middleware.browser = await launch({'logLevel': crawler.settings.get('LOG_LEVEL')})
+        middleware.browser = await launch(logLevel=crawler.settings.get('LOG_LEVEL'))
         crawler.signals.connect(middleware.spider_closed, signals.spider_closed)
 
         return middleware
