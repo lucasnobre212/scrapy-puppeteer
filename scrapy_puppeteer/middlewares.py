@@ -2,7 +2,7 @@
 
 import asyncio
 
-from pyppeteer2 import launch
+from pyppeteer import launch
 from scrapy import signals
 from scrapy.http import HtmlResponse
 from twisted.internet.defer import Deferred
