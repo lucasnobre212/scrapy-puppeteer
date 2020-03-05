@@ -1,2 +1,2 @@
 scrapy>=1.0.0
-pyppeteer
+pyppeteer2
