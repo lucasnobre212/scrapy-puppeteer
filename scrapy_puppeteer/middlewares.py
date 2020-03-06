@@ -43,7 +43,9 @@ class PuppeteerMiddleware:
     async def _process_request(self, request, spider):
         """Handle the request using Puppeteer"""
 
-        page = await self.browser.newPage()
+        # Create new incognito browser
+        context = await self.browser.createIncognitoBrowserContext()
+        page = await context.newPage()
 
         # Cookies
         if isinstance(request.cookies, dict):
@@ -52,21 +54,22 @@ class PuppeteerMiddleware:
                 for k, v in request.cookies.items()
             ])
         else:
-            await page.setCookie(request.cookies)
+            for cookie in request.cookies:
+                await page.setCookie(cookie)
 
         # The headers must be set using request interception
-        await page.setRequestInterception(True)
+        if request.replace_headers:
+            await page.setRequestInterception(True)
 
-        @page.on('request')
-        async def _handle_headers(pu_request):
-            overrides = {
-                'headers': {
-                    k.decode(): ','.join(map(lambda v: v.decode(), v))
-                    for k, v in request.headers.items()
+            @page.on('request')
+            async def _handle_headers(pu_request):
+                overrides = {
+                    'headers': {
+                        k.decode(): ','.join(map(lambda v: v.decode(), v))
+                        for k, v in request.headers.items()
+                    }
                 }
-            }
-            await pu_request.continue_(overrides=overrides)
-
+                await pu_request.continue_(overrides=overrides)
         response = await page.goto(
             request.url,
             {
