@@ -24,7 +24,7 @@ class PuppeteerMiddleware:
         """Start the browser"""
 
         middleware = cls()
-        middleware.browser = await launch(logLevel=crawler.settings.get('LOG_LEVEL'))
+        middleware.browser = await launch(logLevel=crawler.settings.get('LOG_LEVEL'), headless=False)
         crawler.signals.connect(middleware.spider_closed, signals.spider_closed)
 
         return middleware
@@ -59,29 +59,49 @@ class PuppeteerMiddleware:
 
         # The headers must be set using request interception
         if request.replace_headers:
-            await page.setRequestInterception(True)
-
-            @page.on('request')
-            async def _handle_headers(pu_request):
-                overrides = {
-                    'headers': {
-                        k.decode(): ','.join(map(lambda v: v.decode(), v))
-                        for k, v in request.headers.items()
-                    }
-                }
-                await pu_request.continue_(overrides=overrides)
+            headers = {k.decode(): ','.join(map(lambda v: v.decode(), v)) for k, v in request.headers.items()}
+            await page.setExtraHTTPHeaders(headers)
+            # page.on('request', onMediaInfoIntercept)
+            #
+            # @page.on('request')
+            # async def _handle_headers(pu_request):
+            #     overrides = {
+            #         'headers': {
+            #             k.decode(): ','.join(map(lambda v: v.decode(), v))
+            #             for k, v in request.headers.items()
+            #         }
+            #     }
+            #     await pu_request.continue_(overrides=overrides)
         response = await page.goto(
             request.url,
             {
                 'waitUntil': request.wait_until
             },
         )
+        if request.select_element:
+            for element in request.select_element:
+                element_selector = element
+                print(element)
+                await page.waitForSelector(element_selector)
+                element_handle = await page.querySelector(element_selector)
+                print(element_handle)
+                if request.action:
+                    for action in request.action:
+                        if action == 'click':
+                            await element_handle.focus()
+                            await element_handle.click({'delay': 1000})
+                        if action == 'type':
+                            await element_handle.focus()
+                            await element_handle.type(request.send_value)
 
+        if request.exec_pup:
+            exec(request.exec_pup)
         if request.wait_for:
             await page.waitFor(request.wait_for)
 
         if request.screenshot:
             request.meta['screenshot'] = await page.screenshot()
+
 
         content = await page.content()
         body = str.encode(content)
