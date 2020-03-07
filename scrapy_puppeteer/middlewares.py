@@ -24,7 +24,7 @@ class PuppeteerMiddleware:
         """Start the browser"""
 
         middleware = cls()
-        middleware.browser = await launch(logLevel=crawler.settings.get('LOG_LEVEL'), headless=False)
+        middleware.browser = await launch(logLevel=crawler.settings.get('LOG_LEVEL'))
         crawler.signals.connect(middleware.spider_closed, signals.spider_closed)
 
         return middleware
