@@ -123,9 +123,7 @@ class PuppeteerMiddleware:
     def process_request(self, request, spider):
         """Check if the Request should be handled by Puppeteer"""
         
-        if 'pyppeteer' not in request.meta:
-            return
-        if not isinstance(request, PuppeteerRequest):
+        if not isinstance(request, PuppeteerRequest) and 'pyppeteer' not in request.meta:
             return None
 
         return as_deferred(self._process_request(request, spider))
