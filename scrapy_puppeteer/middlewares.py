@@ -122,7 +122,9 @@ class PuppeteerMiddleware:
 
     def process_request(self, request, spider):
         """Check if the Request should be handled by Puppeteer"""
-
+        
+        if 'pyppeteer' not in request.meta:
+            return
         if not isinstance(request, PuppeteerRequest):
             return None
 
