@@ -96,7 +96,7 @@ class PuppeteerMiddleware:
             exec(request.exec_pup)
         if request.wait_for:
             await page.waitFor(request.wait_for,
-                               timeout=1200000)
+                               timeout=120000)
 
         if request.screenshot:
             request.meta['screenshot'] = await page.screenshot()
