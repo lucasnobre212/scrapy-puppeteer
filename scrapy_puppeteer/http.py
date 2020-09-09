@@ -7,7 +7,7 @@ class PuppeteerRequest(Request):
     """Scrapy ``Request`` subclass providing additional arguments"""
 
     def __init__(self, url, callback=None, screenshot=False, wait_until=None, wait_for=None, replace_headers=True,
-                 select_element=None, action=None, send_value=None, exec_pup=None,
+                 select_element=None, action=None, send_value=None, exec_pup=None, incognito=True,
                  *args, **kwargs):
         """Initialize a new Puppeteer request
 
@@ -30,5 +30,6 @@ class PuppeteerRequest(Request):
         self.action = action
         self.send_value = send_value
         self.exec_pup = exec_pup
+        self.incognito = incognito
 
         super().__init__(url, callback, *args, **kwargs)
