@@ -32,6 +32,7 @@ setup(
     entry_points={
         'console_scripts': [
             'scrapyp = scrapy_puppeteer.cli:scrapyp_execute',
+            'scrapy_puppeteer = scrapy_puppeteer.cli:scrapyp_execute'
         ],
     }
 )
