@@ -9,8 +9,8 @@ asyncioreactor.install(asyncio.get_event_loop())
 from scrapy.cmdline import execute
 
 
-def execute(argv=None):
+def scrapyp_execute():
     execute(argv=sys.argv)
 
 if __name__ == '__main__':
-    execute()
+    scrapyp_execute()
