@@ -103,7 +103,8 @@ class PuppeteerMiddleware:
            
         if request.screenshot_element:
             element_ss_selector = request.screenshot_element
-            request.meta['element_ss'] = await page.querySelector(element_ss_selector).screenshot()
+            element_ss = await page.querySelector(element_ss_selector)
+            request.meta['element_ss'] = await element_ss.screenshot()
 
 
         content = await page.content()
