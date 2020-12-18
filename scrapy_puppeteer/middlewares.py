@@ -24,7 +24,7 @@ class PuppeteerMiddleware:
         """Start the browser"""
 
         middleware = cls()
-        middleware.browser = await launch(logLevel=crawler.settings.get('LOG_LEVEL'), headless=True, defaultViewport=None)
+        middleware.browser = await launch(logLevel=crawler.settings.get('LOG_LEVEL'), headless=False)
         crawler.signals.connect(middleware.spider_closed, signals.spider_closed)
 
         return middleware
@@ -75,21 +75,20 @@ class PuppeteerMiddleware:
         )
 
         if request.select_element:
-            # Use css selectors to select element
-            # To use send_value, the value need to have the same index as the select_element
-            for idx, element in enumerate(request.select_element):
-                element_selector = element
-                print(element)
+            # {'element_selector': {'action': '', 'value': ''}
+            for element_selector, instructions in request.select_element.items():
                 await page.waitForSelector(element_selector)
                 element_handle = await page.querySelector(element_selector)
-                if request.action:
-                    action = request.action[idx]
-                    if action == 'click':
-                        await element_handle.focus()
-                        await element_handle.click({'delay': 500})
-                    if action == 'type':
-                        await element_handle.focus()
-                        await element_handle.type(request.send_value[idx])
+                action = instructions.get('action')
+                action_value = instructions.get('value')
+                if action == 'click':
+                    await element_handle.focus()
+                    await element_handle.click()
+                elif action == 'type':
+                    await element_handle.focus()
+                    await element_handle.type(action_value)
+                else:
+                    raise CloseSpider('Unkown action')
                 await asyncio.sleep(1)
 
         if request.exec_pup:
@@ -103,6 +102,7 @@ class PuppeteerMiddleware:
            
         if request.screenshot_element:
             element_ss_selector = request.screenshot_element
+            await page.waitForSelector(element_ss_selector)
             element_ss = await page.querySelector(element_ss_selector)
             request.meta['element_ss'] = await element_ss.screenshot()
 
